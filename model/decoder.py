@@ -37,8 +37,8 @@ class MultiVAE(nn.Module):
         self.encoder = HierEncoder(args.frag, args.atom_vocab, args.rnn_type, args.embed_size, args.hidden_size, args.depthT, args.depthG, args.dropout)
         self.decoder = HierDecoder(args.frag, args.atom_vocab, args.rnn_type, args.embed_size, args.hidden_size, args.latent_size, args.diterT, args.diterG, args.dropout)
 
-    def generator(self, fragsmiles, radius, batch_num, beam_size,topp, num_decode, enum_root, fragment_num, greedy=True):
-        return self.decoder.beamgenerator(fragsmiles, radius, batch_num, beam_size, topp, num_decode, enum_root, fragment_num, greedy=greedy)
+    def sample(self, fragsmiles, radius, batch_num, beam_size,topp, num_decode, enum_root, fragment_num, greedy=True):
+        return self.decoder.sample(fragsmiles, radius, batch_num, beam_size, topp, num_decode, enum_root, fragment_num, greedy=greedy)
        
     def forward(self, frag_graphs, frag_tensors, mol_graphs, mol_tensors, orders, beta, perturb_z=True):
         loss, kl_div, topacc, clacc, iclacc, atacc = self.decoder(frag_graphs, frag_tensors, mol_graphs, mol_tensors, orders)
@@ -393,8 +393,8 @@ class HierDecoder(nn.Module):
 
         return cand_vecs
 
-    def singleBeamdecode(self, fragsmiles, batch_num, beam_size, topp, num_decode, enum_root, fragment_num, greedy=True, max_decode_step=10, beam=20):
-        fragtensor = HierGraphwithFragment.tensorize([fragsmiles], self.vocab, self.avocab)
+    def sample(self, fragsmiles, radius, batch_num, beam_size, topp, num_decode, enum_root, fragment_num, greedy=True, max_decode_step=10, beam=20):
+        fragtensor = HierGraphwithFragment.tensorize([fragsmiles], self.vocab, self.avocab, radius)
         fraggraph, fragtensor, order = to_numpy(fragtensor)
         fragtensor = make_cuda(fragtensor)
 
@@ -413,7 +413,7 @@ class HierDecoder(nn.Module):
         src_graph_vecs =src_root_vecs
 
         tree_batch = IncTree(int(num_decode), node_fdim=3, edge_fdim=4)
-        graph_batch = IncGraph(self.avocab, num_decode, node_fdim=self.hmpn.atom_size, edge_fdim=self.hmpn.atom_size + self.hmpn.bond_size)
+        graph_batch = MessGraph(self.avocab, num_decode, node_fdim=self.hmpn.atom_size, edge_fdim=self.hmpn.atom_size + self.hmpn.bond_size)
 
         stack = [[] for i in range(num_decode)]
         fragnum = [0 for i in range(num_decode)]
@@ -430,7 +430,7 @@ class HierDecoder(nn.Module):
 
         super_root = tree_batch.add_node() 
         for bid in range(batch_size):
-            coresmiles1 = get_context_env(Chem.MolFromSmiles(fragsmiles),2)
+            coresmiles1 = get_context_env(Chem.MolFromSmiles(fragsmiles),radius)
             coresmiles2 = Chem.MolToSmiles(set_atommap(Chem.MolFromSmiles(fragsmiles)))
             clab, ilab = self.vocab[ (coresmiles1 ,coresmiles2, fragsmiles) ]
             

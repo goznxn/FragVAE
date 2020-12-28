@@ -580,7 +580,6 @@ class HierGraphwithFragment(object):
             ismiles = self.smiles
             coresmiles1 = get_context_env(Chem.MolFromSmiles(ismiles),self.radius)
             coresmiles2 = Chem.MolToSmiles(set_atommap(Chem.MolFromSmiles(ismiles)))
-                
             tree.nodes[i]['label'] = (coresmiles1,coresmiles2,ismiles)
             clssb = [x-1 for x in clss]
             tree.nodes[i]['cluster'] = clssb 

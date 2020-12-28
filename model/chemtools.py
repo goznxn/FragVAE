@@ -238,7 +238,7 @@ def get_context_env(mol, radius):
         if a.GetSymbol() == "*":
             for cc in a.GetNeighbors() : 
                 if cc.GetAtomMapNum() == 1: 
-                    i = radius
+                    i = int(radius)
                     b = Chem.FindAtomEnvironmentOfRadiusN(m, i, a.GetIdx())
                     while not b and i > 0:
                         i -= 1

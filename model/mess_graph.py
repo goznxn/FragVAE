@@ -100,7 +100,7 @@ class IncTree(IncBase):
 class MessGraph(IncBase):
 
     def __init__(self, avocab, batch_size, node_fdim, edge_fdim, max_nodes=200, max_edges=400, max_nb=100):
-        super(IncGraph, self).__init__(batch_size, node_fdim, edge_fdim, max_nodes, max_edges, max_nb)
+        super(MessGraph, self).__init__(batch_size, node_fdim, edge_fdim, max_nodes, max_edges, max_nb)
         self.avocab = avocab
         self.mol = Chem.RWMol()
         self.mol.AddAtom( Chem.Atom('C') ) 
