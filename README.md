@@ -1,5 +1,6 @@
 # Frag_VAE
-This repository contains our implementation of ""
+This repository contains our implementation of "A Multi-level Molecular Graph Generative Model for Fragment-based DrugDesign"
+
 
 # Requirements
 * Python(version >= 3.6)
